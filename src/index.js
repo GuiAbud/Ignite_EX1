@@ -97,11 +97,12 @@ app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
 
   const idLocation = user.todos.findIndex((todo) => todo.id === id);
 
-  user.todos.splice(idLocation, 1)
+  user.todos.splice(idLocation, 1);
 
   return response.status(200).json(user.todos);
 });
 
 app.listen(3000);
 
+// Q?
 module.exports = app;
