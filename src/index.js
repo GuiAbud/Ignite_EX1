@@ -34,14 +34,16 @@ app.post("/users", (request, response) => {
     return response.status(400).json({ error: "Username already in use!" }); // Se já existir retorna esse erro
   }
 
-  users.push({
+  const user = {
     id: uuidv4(),
     name,
     username,
     todos: [],
-  }); // Quando cria o usuário automáticamente adiciona esse lista de objetos a ele
+  };
 
-  return response.sendStatus(201);
+  users.push(user);
+
+  return response.status(201).json(user);
 });
 
 app.get("/todos", checksExistsUserAccount, (request, response) => {
@@ -64,7 +66,7 @@ app.post("/todos", checksExistsUserAccount, (request, response) => {
 
   user.todos.push(addToDos); // De fato adiciona essa lista de objetos ao array todos //Aquele errinho de novo
 
-  return response.status(201).send(); // Resposta do servidor
+  return response.status(201).json(addToDos); // Resposta do servidor
 });
 
 app.put("/todos/:id", checksExistsUserAccount, (request, response) => {
@@ -73,6 +75,10 @@ app.put("/todos/:id", checksExistsUserAccount, (request, response) => {
   const { user } = request;
 
   const idLocation = user.todos.find((todo) => todo.id === id);
+
+  if (!idLocation) {
+    return response.status(404).json({ error: "ID couldn't be located!" });
+  }
 
   idLocation.title = title;
   idLocation.deadline = deadline;
@@ -86,6 +92,10 @@ app.patch("/todos/:id/done", checksExistsUserAccount, (request, response) => {
 
   const idLocation = user.todos.find((todo) => todo.id === id);
 
+  if (!idLocation) {
+    return response.status(404).json({ error: "ID could not be located!" });
+  }
+
   idLocation.done = true;
 
   return response.json(idLocation);
@@ -95,14 +105,17 @@ app.delete("/todos/:id", checksExistsUserAccount, (request, response) => {
   const { id } = request.params;
   const { user } = request;
 
-  const idLocation = user.todos.findIndex((todo) => todo.id === id);
+  const idLocation = user.todos.find((todo) => todo.id === id);
+
+  if (!idLocation) {
+    return response.status(404).json({ error: "ID couldn't be located!" });
+  }
 
   user.todos.splice(idLocation, 1);
 
-  return response.status(200).json(user.todos);
+  return response.status(204).json(user.todos);
 });
 
-app.listen(3000);
-
-// Q?
 module.exports = app;
+
+// app.listen(3333);
